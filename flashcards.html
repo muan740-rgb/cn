@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中文词卡 - ฝึกคำศัพท์ภาษาจีน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red: #a31d1d;
+    --red-dark: #7a1414;
+    --gold: #d4af37;
+    --gold-light: #f3d87a;
+    --paper: #fbf3df;
+    --ink: #2b2b2b;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Noto Serif SC', serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05), transparent 40%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 20px),
+      linear-gradient(160deg, var(--red-dark), var(--red) 60%, var(--red-dark));
+    color: var(--paper);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 24px 12px 60px;
+  }
+  header{ text-align:center; margin-bottom: 10px; }
+  header h1{
+    font-family:'Ma Shan Zheng', cursive;
+    font-size: 2.6rem;
+    margin: 0 0 4px;
+    color: var(--gold-light);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    letter-spacing: 2px;
+  }
+  header p{ margin:0; opacity:0.85; font-size:0.9rem; }
+
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    margin: 14px 0; max-width: 700px;
+  }
+  button{
+    font-family:'Noto Serif SC', serif;
+    border: 1px solid var(--gold);
+    background: linear-gradient(180deg, #c62828, #8e1616);
+    color: var(--gold-light);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor:pointer;
+    font-size: 0.9rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  button:hover{ transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+  button:active{ transform: translateY(0); }
+  button.active{ background: linear-gradient(180deg, var(--gold), #b8860b); color: #3a1a00; }
+  button:disabled{ opacity:0.4; cursor:not-allowed; transform:none; }
+
+  #progress{
+    align-self:center;
+    color: var(--gold-light);
+    font-size:0.9rem;
+    padding: 6px 10px;
+    border: 1px dashed var(--gold);
+    border-radius: 8px;
+  }
+
+  .card-area{
+    display:flex; align-items:center; gap:14px;
+    margin-top: 10px;
+  }
+  .nav{
+    font-size:1.6rem;
+    padding: 10px 14px;
+    border-radius: 50%;
+    line-height:1;
+  }
+
+  .card{
+    width: 300px;
+    height: 400px;
+    perspective: 1200px;
+  }
+  .card-inner{
+    position:relative;
+    width:100%; height:100%;
+    transition: transform 0.6s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+    cursor:pointer;
+  }
+  .card-inner.flipped{ transform: rotateY(180deg); }
+
+  .card-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius: 18px;
+    border: 4px solid var(--gold);
+    background: var(--paper);
+    color: var(--ink);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.45), inset 0 0 0 2px var(--red);
+    text-align:center;
+  }
+  .card-front{
+    background:
+      radial-gradient(circle at 85% 12%, rgba(163,29,29,0.08) 0, transparent 40%),
+      var(--paper);
+  }
+  .card-back{ transform: rotateY(180deg); }
+
+  .seal{
+    position:absolute;
+    top: 14px; right: 14px;
+    width: 46px; height: 46px;
+    border: 2px solid var(--red);
+    border-radius: 6px;
+    color: var(--red);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Ma Shan Zheng', cursive;
+    font-size: 1.4rem;
+    transform: rotate(8deg);
+    opacity:0.75;
+  }
+  .hanzi{
+    font-family:'Ma Shan Zheng', cursive;
+    font-size: 5rem;
+    color: var(--red-dark);
+    line-height:1.1;
+  }
+  .pinyin{
+    font-size: 1.6rem;
+    color: var(--red);
+    margin-bottom: 14px;
+    font-weight:600;
+  }
+  .meaning{
+    font-size: 1.3rem;
+    color: var(--ink);
+    line-height:1.5;
+  }
+  .hint{
+    margin-top: 18px;
+    font-size: 0.8rem;
+    color: #8a7a5c;
+  }
+
+  .actions{
+    display:flex; gap:12px; margin-top: 18px;
+  }
+  #knowBtn.marked{
+    background: linear-gradient(180deg, #2e7d32, #1b5e20);
+    color: #d7ffd9;
+    border-color: #a5d6a7;
+  }
+
+  #status{
+    margin-top: 18px;
+    text-align:center;
+    opacity:0.9;
+    max-width: 500px;
+  }
+
+  footer{
+    margin-top: 30px;
+    font-size: 0.75rem;
+    opacity:0.6;
+  }
+
+  @media (max-width: 420px){
+    .card{ width: 86vw; height: 360px; }
+    .hanzi{ font-size: 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>中文词卡</h1>
+  <p>ฝึกคำศัพท์ภาษาจีนด้วยแฟลชการ์ด</p>
+</header>
+
+<div class="toolbar">
+  <button id="shuffleBtn">🔀 สลับสุ่ม</button>
+  <button id="filterBtn">🔍 กรองเฉพาะยังไม่รู้</button>
+  <button id="resetBtn">↺ รีเซ็ตสถานะทั้งหมด</button>
+  <span id="progress">กำลังโหลด...</span>
+</div>
+
+<div class="card-area">
+  <button id="prevBtn" class="nav" title="คำก่อนหน้า">‹</button>
+
+  <div class="card">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <div class="seal">字</div>
+        <div class="hanzi" id="hanzi">...</div>
+        <div class="hint">(แตะที่การ์ดเพื่อพลิกดูคำแปล)</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="pinyin" id="pinyin"></div>
+        <div class="meaning" id="meaning"></div>
+      </div>
+    </div>
+  </div>
+
+  <button id="nextBtn" class="nav" title="คำถัดไป">›</button>
+</div>
+
+<div class="actions">
+  <button id="flipBtn">🔄 พลิกบัตร</button>
+  <button id="knowBtn">✅ จำได้แล้ว</button>
+</div>
+
+<div id="status"></div>
+
+<footer>ข้อมูลคำศัพท์ดึงจาก Google Sheet ของคุณแบบเรียลไทม์</footer>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTPl-nCGe9yJSNdZGiyE_7Pt0lU85hHGwuS77YG0QqhmHxuutKW28qatA6HDbMGIVKcj_PbsoHTPF2E/pub?gid=0&single=true&output=csv";
+
+const STORAGE_KEY = "chinese_flashcards_known_v1";
+
+// ---------- CSV parsing (รองรับเครื่องหมายคำพูดครอบ, ลูกน้ำในข้อความ) ----------
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"' && next === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field = ""; }
+      else if(c === '\r'){ /* skip */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else field += c;
+    }
+  }
+  if(field.length>0 || row.length>0){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(cell => cell.trim() !== ""));
+}
+
+function guessColumns(headerRow){
+  const norm = headerRow.map(h => h.trim().toLowerCase());
+  const find = (candidates) => {
+    for(const c of candidates){
+      const idx = norm.findIndex(h => h.includes(c));
+      if(idx !== -1) return idx;
+    }
+    return -1;
+  };
+  const chineseIdx = find(["chinese","汉字","漢字","hanzi","字","word","中文"]);
+  const pinyinIdx  = find(["pinyin","拼音"]);
+  const meaningIdx = find(["meaning","translation","แปล","ความหมาย","thai","meaning_th","meaning(th)"]);
+  return {
+    chinese: chineseIdx !== -1 ? chineseIdx : 0,
+    pinyin:  pinyinIdx  !== -1 ? pinyinIdx  : 1,
+    meaning: meaningIdx !== -1 ? meaningIdx : 2
+  };
+}
+
+// ---------- State ----------
+let cards = [];       // ข้อมูลทั้งหมด [{id, chinese, pinyin, meaning}]
+let order = [];       // รายการที่แสดงอยู่ตอนนี้ (หลังกรอง/สลับ)
+let currentIndex = 0;
+let onlyUnknown = false;
+let known = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
+
+const hanziEl = document.getElementById("hanzi");
+const pinyinEl = document.getElementById("pinyin");
+const meaningEl = document.getElementById("meaning");
+const cardInner = document.getElementById("cardInner");
+const progressEl = document.getElementById("progress");
+const statusEl = document.getElementById("status");
+const knowBtn = document.getElementById("knowBtn");
+const filterBtn = document.getElementById("filterBtn");
+
+function saveKnown(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(known)));
+}
+
+function shuffleArray(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function rebuildOrder(preserveShuffle){
+  const prevIds = order.map(c => c.id);
+  if(onlyUnknown){
+    order = cards.filter(c => !known.has(c.id));
+  } else {
+    order = cards.slice();
+  }
+  if(preserveShuffle && prevIds.length){
+    // พยายามรักษาลำดับเดิมเท่าที่ยังอยู่ในชุดใหม่
+    const map = new Map(order.map(c => [c.id, c]));
+    const newOrder = [];
+    prevIds.forEach(id => { if(map.has(id)){ newOrder.push(map.get(id)); map.delete(id); } });
+    map.forEach(c => newOrder.push(c));
+    order = newOrder;
+  }
+  if(currentIndex >= order.length) currentIndex = Math.max(0, order.length - 1);
+  render();
+}
+
+function render(){
+  cardInner.classList.remove("flipped");
+  const total = cards.length;
+  const knownCount = cards.filter(c => known.has(c.id)).length;
+  progressEl.textContent = `ทั้งหมด ${total} คำ · จำได้แล้ว ${knownCount} คำ · กำลังแสดง ${order.length} คำ`;
+
+  if(order.length === 0){
+    hanziEl.textContent = onlyUnknown ? "🎉" : "-";
+    pinyinEl.textContent = "";
+    meaningEl.textContent = onlyUnknown ? "จำได้ครบทุกคำแล้ว เก่งมาก!" : "ไม่มีข้อมูลคำศัพท์";
+    knowBtn.disabled = true;
+    statusEl.textContent = "";
+    return;
+  }
+  knowBtn.disabled = false;
+  const c = order[currentIndex];
+  hanziEl.textContent = c.chinese;
+  pinyinEl.textContent = c.pinyin;
+  meaningEl.textContent = c.meaning;
+
+  const isKnown = known.has(c.id);
+  knowBtn.textContent = isKnown ? "↩️ เอาเครื่องหมายออก" : "✅ จำได้แล้ว";
+  knowBtn.classList.toggle("marked", isKnown);
+  statusEl.textContent = `การ์ด ${currentIndex + 1} / ${order.length}`;
+}
+
+function flip(){
+  if(order.length === 0) return;
+  cardInner.classList.toggle("flipped");
+}
+
+function next(){
+  if(order.length === 0) return;
+  currentIndex = (currentIndex + 1) % order.length;
+  render();
+}
+function prev(){
+  if(order.length === 0) return;
+  currentIndex = (currentIndex - 1 + order.length) % order.length;
+  render();
+}
+
+function toggleKnown(){
+  if(order.length === 0) return;
+  const c = order[currentIndex];
+  if(known.has(c.id)) known.delete(c.id);
+  else known.add(c.id);
+  saveKnown();
+
+  if(onlyUnknown){
+    rebuildOrder(true);
+  } else {
+    render();
+  }
+}
+
+document.getElementById("shuffleBtn").addEventListener("click", () => {
+  shuffleArray(order);
+  currentIndex = 0;
+  render();
+});
+
+filterBtn.addEventListener("click", () => {
+  onlyUnknown = !onlyUnknown;
+  filterBtn.classList.toggle("active", onlyUnknown);
+  filterBtn.textContent = onlyUnknown ? "🔍 กำลังกรอง: ยังไม่รู้" : "🔍 กรองเฉพาะยังไม่รู้";
+  currentIndex = 0;
+  rebuildOrder(false);
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(confirm("ต้องการรีเซ็ตสถานะ 'จำได้แล้ว' ของคำศัพท์ทั้งหมดหรือไม่?")){
+    known.clear();
+    saveKnown();
+    rebuildOrder(true);
+  }
+});
+
+document.getElementById("flipBtn").addEventListener("click", flip);
+cardInner.addEventListener("click", flip);
+document.getElementById("nextBtn").addEventListener("click", next);
+document.getElementById("prevBtn").addEventListener("click", prev);
+knowBtn.addEventListener("click", toggleKnown);
+
+document.addEventListener("keydown", (e) => {
+  if(e.key === "ArrowRight") next();
+  if(e.key === "ArrowLeft") prev();
+  if(e.key === " "){ e.preventDefault(); flip(); }
+  if(e.key === "Enter") toggleKnown();
+});
+
+// ---------- โหลดข้อมูล ----------
+async function loadData(){
+  try{
+    const res = await fetch(CSV_URL, { cache: "no-store" });
+    const text = await res.text();
+    const rows = parseCSV(text);
+    if(rows.length < 2){ throw new Error("ไม่พบข้อมูลใน Sheet"); }
+
+    const header = rows[0];
+    const cols = guessColumns(header);
+    const dataRows = rows.slice(1);
+
+    cards = dataRows.map((r, idx) => ({
+      id: (r[cols.chinese] || "").trim() + "_" + idx,
+      chinese: (r[cols.chinese] || "").trim(),
+      pinyin: (r[cols.pinyin] || "").trim(),
+      meaning: (r[cols.meaning] || "").trim()
+    })).filter(c => c.chinese !== "");
+
+    order = cards.slice();
+    shuffleArray(order); // เริ่มต้นแบบสุ่มลำดับเลย ให้ฝึกได้หลากหลาย
+    currentIndex = 0;
+    render();
+  } catch(err){
+    progressEl.textContent = "โหลดข้อมูลไม่สำเร็จ";
+    statusEl.textContent = "เกิดข้อผิดพลาด: " + err.message + " — ตรวจสอบว่า Sheet เผยแพร่เป็นสาธารณะ (Publish to web) แล้ว";
+    console.error(err);
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
